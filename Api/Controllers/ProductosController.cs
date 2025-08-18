@@ -28,6 +28,32 @@ namespace Api.Controllers
             return Ok(listaProductos);
         }
 
+        [HttpGet("buscar")]
+        public ActionResult<List<Producto>> Search([FromQuery] string name)
+        {
+            var listaProductos = productList.Where(x => x.Nombre.Contains(name, StringComparison.OrdinalIgnoreCase)).ToList();
+
+            if (!listaProductos.Any())
+            {
+                return NotFound();
+            }
+
+            return Ok(listaProductos);
+        }
+
+        [HttpGet("precio-minimo/{valor}")]
+        public ActionResult<List<Producto>> GetByValue([FromRoute] decimal valor)
+        {
+            var listaProductos = productList.Where(x => x.Precio >= valor).ToList();
+
+            if (!listaProductos.Any())
+            {
+                return NotFound();
+            }
+
+            return Ok(listaProductos);
+        }
+
         [HttpGet("{id}")]
         public ActionResult<List<Producto>> GetById([FromRoute] int id)
         {
@@ -41,12 +67,16 @@ namespace Api.Controllers
             return Ok(producto);
         }
 
+        [HttpGet("total")]
+        public ActionResult<List<Producto>> GetTotalOfProducts()
+            => Ok(productList.Count());
+
         [HttpPost]
         public ActionResult<ProductoResponse> Create([FromBody] ProductoRequest producto)
         {
-            if (string.IsNullOrEmpty(producto.Nombre) || producto.Precio <= 0)
+            if (string.IsNullOrEmpty(producto.Nombre) || producto.Precio <= 0 || producto.Stock < 0)
             {
-                return BadRequest("nombre vacio y/o precio igual a 0.");
+                return BadRequest("Campos erroneos.");
             }
 
             if (productList.Any())
@@ -89,8 +119,25 @@ namespace Api.Controllers
                 return BadRequest("nombre vacio y/o precio igual a 0.");
             }
 
-            productoExistente.Nombre = producto.Nombre + ".";
+            productoExistente.Nombre = producto.Nombre;
             productoExistente.Precio = producto.Precio;
+
+            return NoContent();
+        }
+
+        [HttpPatch("{id}")]
+        public ActionResult UpdateKeyMetadata([FromRoute] int id, [FromBody] UpdateKeyMetadataRequest producto)
+        {
+            var productoExistente = productList.FirstOrDefault(x => x.Id == id);
+
+            if (productoExistente == null)
+            {
+                return NotFound("Producto no encontrado");
+            }
+
+            productoExistente.Nombre = producto.Nombre ?? productoExistente.Nombre;
+            productoExistente.Precio = producto.Precio ?? productoExistente.Precio;
+            productoExistente.Stock = producto.Stock ?? productoExistente.Stock;
 
             return NoContent();
         }

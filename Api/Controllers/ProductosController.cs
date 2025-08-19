@@ -23,9 +23,18 @@ namespace Api.Controllers
         }
 
         [HttpGet("buscar")]
-        public ActionResult<List<Producto>> Search([FromQuery] string name)
+        public ActionResult<List<Producto>> Search([FromQuery] string? name,
+            [FromQuery] int? categoriaId,
+            [FromQuery] decimal? pMin,
+            [FromQuery] decimal? pMax)
         {
-            var listaProductos = DataSet.Productos.Where(x => x.Nombre.Contains(name, StringComparison.OrdinalIgnoreCase)).ToList();
+            var listaProductos = DataSet.Productos
+                .Where(x =>
+                    (string.IsNullOrWhiteSpace(name) || x.Nombre.Contains(name, StringComparison.OrdinalIgnoreCase)) &&
+                    (categoriaId is null || (x.Categoria is not null && x.Categoria.Id == categoriaId.Value)) &&
+                    (pMin is null || x.Precio >= pMin.Value) &&
+                    (pMax is null || x.Precio <= pMax.Value))
+                .ToList();
 
             if (!listaProductos.Any())
             {

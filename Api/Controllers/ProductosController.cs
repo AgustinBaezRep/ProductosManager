@@ -1,4 +1,5 @@
 ﻿using Api.Contracts;
+using Api.Data;
 using Api.Entities;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,17 +9,10 @@ namespace Api.Controllers
     [ApiController]
     public class ProductosController : ControllerBase
     {
-        private static List<Producto> productList = new List<Producto>()
-        {
-            new Producto(1, "Libro A", 25000, 1),
-            new Producto(2, "Libro B", 32000, 2),
-            new Producto(3, "Libro C", 12000, 3)
-        };
-
         [HttpGet]
         public ActionResult<List<Producto>> GetAll()
         {
-            var listaProductos = productList.ToList();
+            var listaProductos = DataSet.Productos.ToList();
 
             if (listaProductos.Count < 2)
             {
@@ -31,7 +25,7 @@ namespace Api.Controllers
         [HttpGet("buscar")]
         public ActionResult<List<Producto>> Search([FromQuery] string name)
         {
-            var listaProductos = productList.Where(x => x.Nombre.Contains(name, StringComparison.OrdinalIgnoreCase)).ToList();
+            var listaProductos = DataSet.Productos.Where(x => x.Nombre.Contains(name, StringComparison.OrdinalIgnoreCase)).ToList();
 
             if (!listaProductos.Any())
             {
@@ -44,7 +38,7 @@ namespace Api.Controllers
         [HttpGet("precio-minimo/{valor}")]
         public ActionResult<List<Producto>> GetByValue([FromRoute] decimal valor)
         {
-            var listaProductos = productList.Where(x => x.Precio >= valor).ToList();
+            var listaProductos = DataSet.Productos.Where(x => x.Precio >= valor).ToList();
 
             if (!listaProductos.Any())
             {
@@ -55,9 +49,9 @@ namespace Api.Controllers
         }
 
         [HttpGet("{id}")]
-        public ActionResult<List<Producto>> GetById([FromRoute] int id)
+        public ActionResult<Producto> GetById([FromRoute] int id)
         {
-            var producto = productList.FirstOrDefault(x => x.Id == id);
+            var producto = DataSet.Productos.FirstOrDefault(x => x.Id == id);
 
             if (producto == null)
             {
@@ -68,8 +62,47 @@ namespace Api.Controllers
         }
 
         [HttpGet("total")]
-        public ActionResult<List<Producto>> GetTotalOfProducts()
-            => Ok(productList.Count());
+        public ActionResult<int> GetTotalOfProducts()
+        {
+            return Ok(DataSet.Productos.Count());
+        }
+
+        [HttpPut("{id}/asociar/{categoriaId}")]
+        public IActionResult AssociateCategory([FromRoute] int id, [FromRoute] int categoriaId)
+        {
+            var producto = DataSet.Productos.FirstOrDefault(x => x.Id == id);
+
+            var categoria = DataSet.Categorias.FirstOrDefault(x => x.Id == categoriaId);
+
+            if (producto == null)
+            {
+                return NotFound("Producto no encontrado");
+            }
+
+            if (categoria == null)
+            {
+                return NotFound("Categoria no encontrada");
+            }
+
+            producto.Categoria = categoria;
+
+            return NoContent();
+        }
+
+        [HttpDelete("{id}/desasociar")]
+        public IActionResult DisassociateCategory([FromRoute] int id)
+        {
+            var producto = DataSet.Productos.FirstOrDefault(x => x.Id == id);
+
+            if (producto == null)
+            {
+                return NotFound("Producto no encontrado");
+            }
+
+            producto.Categoria = null;
+
+            return NoContent();
+        }
 
         [HttpPost]
         public ActionResult<ProductoResponse> Create([FromBody] ProductoRequest producto)
@@ -79,20 +112,13 @@ namespace Api.Controllers
                 return BadRequest("Campos erroneos.");
             }
 
-            if (productList.Any())
-            {
-                producto.Id = productList.Max(x => x.Id) + 1;
-            }
-            else
-            {
-                producto.Id = 1;
-            }
+            producto.Id = DataSet.Productos.Any() ? DataSet.Productos.Max(x => x.Id) + 1 : 1;
 
             int stock = producto.Stock == null ? 10 : producto.Stock.Value;
 
             var newProducto = new Producto(producto.Id, producto.Nombre, producto.Precio, stock);
 
-            productList.Add(newProducto);
+            DataSet.Productos.Add(newProducto);
 
             var returnProducto = new ProductoResponse()
             {
@@ -105,9 +131,9 @@ namespace Api.Controllers
         }
 
         [HttpPut("{id}")]
-        public ActionResult Update([FromRoute] int id, [FromBody] ProductoRequest producto)
+        public IActionResult Update([FromRoute] int id, [FromBody] ProductoRequest producto)
         {
-            var productoExistente = productList.FirstOrDefault(x => x.Id == id);
+            var productoExistente = DataSet.Productos.FirstOrDefault(x => x.Id == id);
 
             if (productoExistente == null)
             {
@@ -126,9 +152,9 @@ namespace Api.Controllers
         }
 
         [HttpPatch("{id}")]
-        public ActionResult UpdateKeyMetadata([FromRoute] int id, [FromBody] UpdateKeyMetadataRequest producto)
+        public IActionResult UpdateKeyMetadata([FromRoute] int id, [FromBody] UpdateKeyMetadataRequest producto)
         {
-            var productoExistente = productList.FirstOrDefault(x => x.Id == id);
+            var productoExistente = DataSet.Productos.FirstOrDefault(x => x.Id == id);
 
             if (productoExistente == null)
             {
@@ -143,16 +169,16 @@ namespace Api.Controllers
         }
 
         [HttpDelete("{id}")]
-        public ActionResult Delete([FromRoute] int id)
+        public IActionResult Delete([FromRoute] int id)
         {
-            var productoExistente = productList.FirstOrDefault(x => x.Id == id);
+            var productoExistente = DataSet.Productos.FirstOrDefault(x => x.Id == id);
 
             if (productoExistente == null)
             {
                 return NotFound("Producto no encontrado");
             }
 
-            productList.Remove(productoExistente);
+            DataSet.Productos.Remove(productoExistente);
 
             return NoContent();
         }

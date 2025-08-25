@@ -1,6 +1,4 @@
-﻿using Api.Entities;
-
-namespace Api.Contracts
+﻿namespace Application.Contracts
 {
     public class ProductoRequest
     {

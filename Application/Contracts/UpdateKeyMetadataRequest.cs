@@ -1,4 +1,4 @@
-﻿namespace Api.Contracts
+﻿namespace Application.Contracts
 {
     public class UpdateKeyMetadataRequest
     {

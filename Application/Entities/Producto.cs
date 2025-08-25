@@ -1,6 +1,6 @@
-﻿using Api.Controllers;
+﻿using Application.Entities;
 
-namespace Api.Entities
+namespace Application.Entities
 {
     public class Producto
     {

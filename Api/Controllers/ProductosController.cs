@@ -1,6 +1,7 @@
-﻿using Api.Contracts;
-using Api.Data;
-using Api.Entities;
+﻿using Application.Contracts;
+using Application.Data;
+using Application.Entities;
+using Application.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
@@ -9,12 +10,19 @@ namespace Api.Controllers
     [ApiController]
     public class ProductosController : ControllerBase
     {
+        private readonly IProductoService _productoService;
+
+        public ProductosController(IProductoService productoService)
+        {
+            _productoService = productoService;
+        }
+
         [HttpGet]
         public ActionResult<List<Producto>> GetAll()
         {
-            var listaProductos = DataSet.Productos.ToList();
+            var listaProductos = _productoService.GetAll();
 
-            if (listaProductos.Count < 2)
+            if (!listaProductos.Any())
             {
                 return Conflict("El numero de productos es menor a 2");
             }
@@ -83,14 +91,14 @@ namespace Api.Controllers
 
             var categoria = DataSet.Categorias.FirstOrDefault(x => x.Id == categoriaId);
 
-            if (producto == null)
+            if (producto == null || categoria == null)
             {
-                return NotFound("Producto no encontrado");
+                return NotFound("Producto o categoria no encontrado");
             }
 
-            if (categoria == null)
+            if (producto.Categoria != null)
             {
-                return NotFound("Categoria no encontrada");
+                return Conflict("El producto ya está asociado a esta categoría");
             }
 
             producto.Categoria = categoria;
@@ -114,29 +122,16 @@ namespace Api.Controllers
         }
 
         [HttpPost]
-        public ActionResult<ProductoResponse> Create([FromBody] ProductoRequest producto)
+        public ActionResult Create([FromBody] ProductoRequest producto)
         {
-            if (string.IsNullOrEmpty(producto.Nombre) || producto.Precio <= 0 || producto.Stock < 0)
+            var isCreated = _productoService.Create(producto);
+
+            if (!isCreated)
             {
-                return BadRequest("Campos erroneos.");
+                return Conflict("Error al crear el producto");
             }
 
-            producto.Id = DataSet.Productos.Any() ? DataSet.Productos.Max(x => x.Id) + 1 : 1;
-
-            int stock = producto.Stock == null ? 10 : producto.Stock.Value;
-
-            var newProducto = new Producto(producto.Id, producto.Nombre, producto.Precio, stock);
-
-            DataSet.Productos.Add(newProducto);
-
-            var returnProducto = new ProductoResponse()
-            {
-                Id = newProducto.Id,
-                Nombre = newProducto.Nombre,
-                Precio = newProducto.Precio
-            };
-
-            return CreatedAtAction(nameof(GetById), new { id = returnProducto.Id }, returnProducto);
+            return Created(nameof(GetById), producto.Id);
         }
 
         [HttpPut("{id}")]

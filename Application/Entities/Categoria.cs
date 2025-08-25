@@ -1,6 +1,4 @@
-﻿using Api.Controllers;
-
-namespace Api.Entities
+﻿namespace Application.Entities
 {
     public class Categoria
     {

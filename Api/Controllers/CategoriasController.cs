@@ -1,5 +1,5 @@
-﻿using Api.Data;
-using Api.Entities;
+﻿using Application.Data;
+using Application.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers

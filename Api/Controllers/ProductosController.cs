@@ -1,6 +1,7 @@
 ﻿using Application.Data;
 using Application.Services;
 using Contracts.Requests;
+using Contracts.Responses;
 using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,7 +19,7 @@ namespace Api.Controllers
         }
 
         [HttpGet]
-        public ActionResult<List<Producto>> GetAll()
+        public ActionResult<List<ProductoResponse>> GetAll()
         {
             var listaProductos = _productoService.GetAll();
 

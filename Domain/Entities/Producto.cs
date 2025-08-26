@@ -1,6 +1,4 @@
-﻿using Application.Entities;
-
-namespace Application.Entities
+﻿namespace Domain.Entities
 {
     public class Producto
     {

@@ -1,5 +1,5 @@
-﻿using Application.Contracts;
-using Application.Entities;
+﻿using Contracts.Requests;
+using Domain.Entities;
 
 namespace Application.Services
 {

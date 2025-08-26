@@ -1,7 +1,7 @@
-﻿using Application.Contracts;
-using Application.Data;
-using Application.Entities;
+﻿using Application.Data;
 using Application.Services;
+using Contracts.Requests;
+using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
@@ -36,7 +36,7 @@ namespace Api.Controllers
             [FromQuery] decimal? pMin,
             [FromQuery] decimal? pMax)
         {
-            var listaProductos = DataSet.Productos
+            var listaProductos = DataTables.Productos
                 .Where(x =>
                     (string.IsNullOrWhiteSpace(name) || x.Nombre.Contains(name, StringComparison.OrdinalIgnoreCase)) &&
                     (categoriaId is null || (x.Categoria is not null && x.Categoria.Id == categoriaId.Value)) &&
@@ -55,7 +55,7 @@ namespace Api.Controllers
         [HttpGet("precio-minimo/{valor}")]
         public ActionResult<List<Producto>> GetByValue([FromRoute] decimal valor)
         {
-            var listaProductos = DataSet.Productos.Where(x => x.Precio >= valor).ToList();
+            var listaProductos = DataTables.Productos.Where(x => x.Precio >= valor).ToList();
 
             if (!listaProductos.Any())
             {
@@ -68,7 +68,7 @@ namespace Api.Controllers
         [HttpGet("{id}")]
         public ActionResult<Producto> GetById([FromRoute] int id)
         {
-            var producto = DataSet.Productos.FirstOrDefault(x => x.Id == id);
+            var producto = DataTables.Productos.FirstOrDefault(x => x.Id == id);
 
             if (producto == null)
             {
@@ -81,15 +81,15 @@ namespace Api.Controllers
         [HttpGet("total")]
         public ActionResult<int> GetTotalOfProducts()
         {
-            return Ok(DataSet.Productos.Count());
+            return Ok(DataTables.Productos.Count());
         }
 
         [HttpPut("{id}/asociar/{categoriaId}")]
         public IActionResult AssociateCategory([FromRoute] int id, [FromRoute] int categoriaId)
         {
-            var producto = DataSet.Productos.FirstOrDefault(x => x.Id == id);
+            var producto = DataTables.Productos.FirstOrDefault(x => x.Id == id);
 
-            var categoria = DataSet.Categorias.FirstOrDefault(x => x.Id == categoriaId);
+            var categoria = DataTables.Categorias.FirstOrDefault(x => x.Id == categoriaId);
 
             if (producto == null || categoria == null)
             {
@@ -109,7 +109,7 @@ namespace Api.Controllers
         [HttpDelete("{id}/desasociar")]
         public IActionResult DisassociateCategory([FromRoute] int id)
         {
-            var producto = DataSet.Productos.FirstOrDefault(x => x.Id == id);
+            var producto = DataTables.Productos.FirstOrDefault(x => x.Id == id);
 
             if (producto == null)
             {
@@ -122,7 +122,7 @@ namespace Api.Controllers
         }
 
         [HttpPost]
-        public ActionResult Create([FromBody] ProductoRequest producto)
+        public IActionResult Create([FromBody] ProductoRequest producto)
         {
             var isCreated = _productoService.Create(producto);
 
@@ -137,7 +137,7 @@ namespace Api.Controllers
         [HttpPut("{id}")]
         public IActionResult Update([FromRoute] int id, [FromBody] ProductoRequest producto)
         {
-            var productoExistente = DataSet.Productos.FirstOrDefault(x => x.Id == id);
+            var productoExistente = DataTables.Productos.FirstOrDefault(x => x.Id == id);
 
             if (productoExistente == null)
             {
@@ -158,7 +158,7 @@ namespace Api.Controllers
         [HttpPatch("{id}")]
         public IActionResult UpdateKeyMetadata([FromRoute] int id, [FromBody] UpdateKeyMetadataRequest producto)
         {
-            var productoExistente = DataSet.Productos.FirstOrDefault(x => x.Id == id);
+            var productoExistente = DataTables.Productos.FirstOrDefault(x => x.Id == id);
 
             if (productoExistente == null)
             {
@@ -175,14 +175,14 @@ namespace Api.Controllers
         [HttpDelete("{id}")]
         public IActionResult Delete([FromRoute] int id)
         {
-            var productoExistente = DataSet.Productos.FirstOrDefault(x => x.Id == id);
+            var productoExistente = DataTables.Productos.FirstOrDefault(x => x.Id == id);
 
             if (productoExistente == null)
             {
                 return NotFound("Producto no encontrado");
             }
 
-            DataSet.Productos.Remove(productoExistente);
+            DataTables.Productos.Remove(productoExistente);
 
             return NoContent();
         }

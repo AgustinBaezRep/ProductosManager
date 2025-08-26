@@ -1,4 +1,4 @@
-﻿namespace Application.Contracts
+﻿namespace Contracts.Requests
 {
     public class ProductoRequest
     {

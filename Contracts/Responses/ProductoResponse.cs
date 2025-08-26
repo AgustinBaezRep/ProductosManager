@@ -1,4 +1,4 @@
-﻿namespace Application.Contracts
+﻿namespace Contracts.Responses
 {
     public class ProductoResponse
     {

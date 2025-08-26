@@ -1,8 +1,8 @@
-﻿using Application.Entities;
+﻿using Domain.Entities;
 
 namespace Application.Data
 {
-    public static class DataSet
+    public static class DataTables
     {
         public static List<Producto> Productos { get; set; } =
         [

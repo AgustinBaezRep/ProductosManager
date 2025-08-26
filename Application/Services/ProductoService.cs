@@ -1,6 +1,6 @@
-﻿using Application.Contracts;
-using Application.Data;
-using Application.Entities;
+﻿using Application.Data;
+using Contracts.Requests;
+using Domain.Entities;
 
 namespace Application.Services
 {
@@ -15,13 +15,13 @@ namespace Application.Services
                 return isSucceded;
             }
 
-            producto.Id = DataSet.Productos.Any() ? DataSet.Productos.Max(x => x.Id) + 1 : 1;
+            producto.Id = DataTables.Productos.Any() ? DataTables.Productos.Max(x => x.Id) + 1 : 1;
 
             int stock = producto.Stock == null ? 10 : producto.Stock.Value;
 
             var newProducto = new Producto(producto.Id, producto.Nombre, producto.Precio, stock);
 
-            DataSet.Productos.Add(newProducto);
+            DataTables.Productos.Add(newProducto);
 
             isSucceded = true;
 
@@ -30,7 +30,7 @@ namespace Application.Services
 
         public List<Producto> GetAll()
         {
-            var listaProductos = DataSet.Productos.ToList();
+            var listaProductos = DataTables.Productos.ToList();
 
             if (listaProductos.Count < 2)
             {

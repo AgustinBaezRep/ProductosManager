@@ -1,5 +1,5 @@
 ﻿using Application.Data;
-using Application.Entities;
+using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
@@ -11,7 +11,7 @@ namespace Api.Controllers
         [HttpGet]
         public ActionResult<List<Categoria>> GetAll()
         {
-            var listaCategorias = DataSet.Categorias.ToList();
+            var listaCategorias = DataTables.Categorias.ToList();
 
             return Ok(listaCategorias);
         }
@@ -19,7 +19,7 @@ namespace Api.Controllers
         [HttpGet("{id}")]
         public ActionResult<Categoria> GetById([FromRoute] int id)
         {
-            var categoria = DataSet.Categorias.FirstOrDefault(x => x.Id == id);
+            var categoria = DataTables.Categorias.FirstOrDefault(x => x.Id == id);
 
             if (categoria == null)
             {
@@ -32,14 +32,14 @@ namespace Api.Controllers
         [HttpGet("{id}/productos")]
         public ActionResult<List<Producto>> GetProductosByCategoriaId([FromRoute] int id)
         {
-            var categoria = DataSet.Categorias.FirstOrDefault(x => x.Id == id);
+            var categoria = DataTables.Categorias.FirstOrDefault(x => x.Id == id);
 
             if (categoria == null)
             {
                 return NotFound("Categoria no encontrada");
             }
 
-            var productos = DataSet.Productos.Where(p => p.Categoria?.Id == id).ToList();
+            var productos = DataTables.Productos.Where(p => p.Categoria?.Id == id).ToList();
 
             if (!productos.Any())
             {
@@ -59,11 +59,11 @@ namespace Api.Controllers
 
             var nuevaCategoria = new Categoria
             {
-                Id = DataSet.Categorias.Any() ? DataSet.Categorias.Max(x => x.Id) + 1 : 1,
+                Id = DataTables.Categorias.Any() ? DataTables.Categorias.Max(x => x.Id) + 1 : 1,
                 Nombre = categoria.Nombre
             };
 
-            DataSet.Categorias.Add(nuevaCategoria);
+            DataTables.Categorias.Add(nuevaCategoria);
 
             return CreatedAtAction(nameof(GetById), new { id = nuevaCategoria.Id }, nuevaCategoria);
         }
@@ -71,7 +71,7 @@ namespace Api.Controllers
         [HttpPut("{id}")]
         public IActionResult Update([FromRoute] int id, [FromBody] Categoria categoria)
         {
-            var categoriaExistente = DataSet.Categorias.FirstOrDefault(x => x.Id == id);
+            var categoriaExistente = DataTables.Categorias.FirstOrDefault(x => x.Id == id);
 
             if (categoriaExistente == null)
             {
@@ -83,7 +83,7 @@ namespace Api.Controllers
                 return BadRequest("Categoria no puede ser nula o tener un nombre vacío");
             }
 
-            if (DataSet.Productos.Any(p => p.Categoria?.Id == id))
+            if (DataTables.Productos.Any(p => p.Categoria?.Id == id))
             {
                 return Conflict("No se puede actualizar la categoría porque hay productos asociados a ella.");
             }
@@ -96,19 +96,19 @@ namespace Api.Controllers
         [HttpDelete("{id}")]
         public IActionResult Delete([FromRoute] int id)
         {
-            var categoriaExistente = DataSet.Categorias.FirstOrDefault(x => x.Id == id);
+            var categoriaExistente = DataTables.Categorias.FirstOrDefault(x => x.Id == id);
 
             if (categoriaExistente == null)
             {
                 return NotFound("Categoria no encontrada");
             }
 
-            if (DataSet.Productos.Any(p => p.Categoria?.Id == id))
+            if (DataTables.Productos.Any(p => p.Categoria?.Id == id))
             {
                 return Conflict("No se puede eliminar la categoría porque hay productos asociados a ella.");
             }
 
-            DataSet.Categorias.Remove(categoriaExistente);
+            DataTables.Categorias.Remove(categoriaExistente);
 
             return NoContent();
         }

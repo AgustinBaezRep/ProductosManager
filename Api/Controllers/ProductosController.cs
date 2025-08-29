@@ -1,8 +1,6 @@
-﻿using Application.Data;
-using Application.Services;
+﻿using Application.Services;
 using Contracts.Requests;
 using Contracts.Responses;
-using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
@@ -32,7 +30,7 @@ namespace Api.Controllers
         }
 
         [HttpGet("buscar")]
-        public ActionResult<List<Producto>> Search([FromQuery] string? name, 
+        public ActionResult<List<ProductoResponse>> Search([FromQuery] string? name, 
             [FromQuery] int? categoriaId, 
             [FromQuery] decimal? pMin, 
             [FromQuery] decimal? pMax)
@@ -48,7 +46,7 @@ namespace Api.Controllers
         }
 
         [HttpGet("precio-minimo/{valor}")]
-        public ActionResult<List<Producto>> GetByValue([FromRoute] decimal valor)
+        public ActionResult<List<ProductoResponse>> GetByValue([FromRoute] decimal valor)
         {
             var listaProductos = _productoService.GetByValue(valor);
 
@@ -61,7 +59,7 @@ namespace Api.Controllers
         }
 
         [HttpGet("{id}")]
-        public ActionResult<Producto> GetById([FromRoute] int id)
+        public ActionResult<ProductoResponse?> GetById([FromRoute] int id)
         {
             var producto = _productoService.GetById(id);
 
@@ -80,7 +78,7 @@ namespace Api.Controllers
         }
 
         [HttpPut("{id}/asociar/{categoriaId}")]
-        public IActionResult AssociateCategory([FromRoute] int id, [FromRoute] int categoriaId)
+        public ActionResult AssociateCategory([FromRoute] int id, [FromRoute] int categoriaId)
         {
             var associated = _productoService.AssociateCategory(id, categoriaId);
 
@@ -93,7 +91,7 @@ namespace Api.Controllers
         }
 
         [HttpDelete("{id}/desasociar")]
-        public IActionResult DisassociateCategory([FromRoute] int id)
+        public ActionResult DisassociateCategory([FromRoute] int id)
         {
             var disassociated = _productoService.DisassociateCategory(id);
 
@@ -106,7 +104,7 @@ namespace Api.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create([FromBody] ProductoRequest producto)
+        public ActionResult Create([FromBody] CreateProductoRequest producto)
         {
             var isCreated = _productoService.Create(producto);
 
@@ -119,7 +117,7 @@ namespace Api.Controllers
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update([FromRoute] int id, [FromBody] ProductoRequest producto)
+        public ActionResult Update([FromRoute] int id, [FromBody] UpdateProductoRequest producto)
         {
             var isUpdated = _productoService.Update(id, producto);
 
@@ -132,7 +130,7 @@ namespace Api.Controllers
         }
 
         [HttpPatch("{id}")]
-        public IActionResult UpdateKeyMetadata([FromRoute] int id, [FromBody] UpdateKeyMetadataRequest producto)
+        public ActionResult UpdateKeyMetadata([FromRoute] int id, [FromBody] UpdateKeyMetadataProductoRequest producto)
         {
             var isUpdated = _productoService.UpdateKeyMetadata(id, producto);
 
@@ -145,7 +143,7 @@ namespace Api.Controllers
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete([FromRoute] int id)
+        public ActionResult Delete([FromRoute] int id)
         {
             var isDeleted = _productoService.Delete(id);
 

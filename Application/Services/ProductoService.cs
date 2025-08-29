@@ -32,7 +32,7 @@ namespace Application.Services
             return listaProductos;
         }
 
-        public bool Create(ProductoRequest producto)
+        public bool Create(CreateProductoRequest producto)
         {
             var productos = _productoRepository.GetAll();
 
@@ -152,7 +152,7 @@ namespace Application.Services
             return listaProductos;
         }
 
-        public bool Update(int id, ProductoRequest request)
+        public bool Update(int id, UpdateProductoRequest request)
         {
             var productoExistente = _productoRepository.GetById(id);
 
@@ -169,7 +169,7 @@ namespace Application.Services
             return _productoRepository.Update(productoExistente, request);
         }
 
-        public bool UpdateKeyMetadata(int id, UpdateKeyMetadataRequest producto)
+        public bool UpdateKeyMetadata(int id, UpdateKeyMetadataProductoRequest producto)
         {
             var productoExistente = _productoRepository.GetById(id);
 
@@ -178,11 +178,7 @@ namespace Application.Services
                 return false;
             }
 
-            productoExistente.Nombre = producto.Nombre ?? productoExistente.Nombre;
-            productoExistente.Precio = producto.Precio ?? productoExistente.Precio;
-            productoExistente.Stock = producto.Stock ?? productoExistente.Stock;
-
-            return true;
+            return _productoRepository.UpdateKeyMetadata(productoExistente, producto);
         }
     }
 }

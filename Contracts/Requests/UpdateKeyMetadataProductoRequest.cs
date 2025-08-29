@@ -1,6 +1,6 @@
 ﻿namespace Contracts.Requests
 {
-    public class UpdateKeyMetadataRequest
+    public class UpdateKeyMetadataProductoRequest
     {
         public string? Nombre { get; set; }
         public decimal? Precio { get; set; }

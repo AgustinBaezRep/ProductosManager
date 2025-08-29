@@ -12,9 +12,9 @@ namespace Application.Services
         int GetTotalProductos();
         bool AssociateCategory(int id, int categoriaId);
         bool DisassociateCategory(int id);
-        bool Create(ProductoRequest request);
-        bool Update(int id, ProductoRequest request);
-        bool UpdateKeyMetadata(int id, UpdateKeyMetadataRequest producto);
+        bool Create(CreateProductoRequest request);
+        bool Update(int id, UpdateProductoRequest request);
+        bool UpdateKeyMetadata(int id, UpdateKeyMetadataProductoRequest producto);
         bool Delete(int id);
     }
 }

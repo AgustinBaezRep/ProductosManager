@@ -27,10 +27,19 @@ namespace Infrastructure.Persistence.Repositories
             return true;
         }
 
-        public bool Update(Producto producto, ProductoRequest request)
+        public bool Update(Producto producto, UpdateProductoRequest request)
         {
             producto.Nombre = request.Nombre;
             producto.Precio = request.Precio;
+            producto.Stock = request.Stock;
+
+            return true;
+        }
+
+        public bool UpdateKeyMetadata(Producto producto, UpdateKeyMetadataProductoRequest request)
+        {
+            producto.Nombre = request.Nombre ?? producto.Nombre;
+            producto.Precio = request.Precio ?? producto.Precio;
             producto.Stock = request.Stock ?? producto.Stock;
 
             return true;

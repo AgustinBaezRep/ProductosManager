@@ -8,28 +8,26 @@ namespace Application.Services
     public class ProductoService : IProductoService
     {
         private readonly IProductoRepository _productoRepository;
+        private readonly ICategoriaRepository _categoriaRepository;
 
-        public ProductoService(IProductoRepository productoRepository)
+        public ProductoService(IProductoRepository productoRepository, ICategoriaRepository categoriaRepository)
         {
             _productoRepository = productoRepository;
+            _categoriaRepository = categoriaRepository;
         }
 
         public List<ProductoResponse> GetAll()
         {
-            var listaProductos = _productoRepository.GetAll()
+            var listaProductos = _productoRepository
+                .GetAll()
                 .Select(p => new ProductoResponse
                 {
                     Id = p.Id,
                     Nombre = p.Nombre,
                     Precio = p.Precio,
-                    Stock = p.Stock
-                })
-                .ToList();
-
-            if (listaProductos.Count < 2)
-            {
-                return new List<ProductoResponse>();
-            }
+                    Stock = p.Stock,
+                    Categoria = p.Categoria
+                }).ToList();
 
             return listaProductos;
         }
@@ -54,47 +52,137 @@ namespace Application.Services
 
         public bool Delete(int id)
         {
-            throw new NotImplementedException();
+            var producto = _productoRepository.GetById(id);
+
+            if (producto == null)
+            {
+                return false;
+            }
+
+            return _productoRepository.Delete(producto);
         }
 
         public bool DisassociateCategory(int id)
         {
-            throw new NotImplementedException();
+            var producto = _productoRepository.GetById(id);
+
+            if (producto == null)
+            {
+                return false;
+            }
+
+            producto.Categoria = null;
+
+            return true;
         }
 
         public bool AssociateCategory(int id, int categoriaId)
         {
-            throw new NotImplementedException();
+            var producto = _productoRepository.GetById(id);
+
+            var categoria = _categoriaRepository.GetById(categoriaId);
+
+            if (producto == null || categoria == null)
+            {
+                return false;
+            }
+
+            if (producto.Categoria != null)
+            {
+                return false;
+            }
+
+            producto.Categoria = categoria;
+
+            return true;
         }
 
         public ProductoResponse? GetById(int id)
         {
-            throw new NotImplementedException();
+            return _productoRepository.GetById(id) is Producto producto
+                ? new ProductoResponse()
+                {
+                    Id = producto.Id,
+                    Nombre = producto.Nombre,
+                    Precio = producto.Precio,
+                    Stock = producto.Stock,
+                    Categoria = producto.Categoria
+                }
+                : null;
         }
 
         public List<ProductoResponse> GetByValue(decimal valor)
         {
-            throw new NotImplementedException();
+            var listaProductos = _productoRepository
+                .GetByCriteria(x => x.Precio >= valor)
+                .Select(s => new ProductoResponse()
+                {
+                    Id = s.Id,
+                    Nombre = s.Nombre,
+                    Precio = s.Precio,
+                    Stock = s.Stock,
+                    Categoria = s.Categoria
+                }).ToList();
+
+            return listaProductos;
         }
 
         public int GetTotalProductos()
         {
-            throw new NotImplementedException();
+            return _productoRepository.GetAll().Count;
         }
 
         public List<ProductoResponse> Search(string? name, int? categoriaId, decimal? pMin, decimal? pMax)
         {
-            throw new NotImplementedException();
+            var listaProductos = _productoRepository
+                .GetByCriteria(x =>
+                    (string.IsNullOrWhiteSpace(name) || x.Nombre.Contains(name, StringComparison.OrdinalIgnoreCase)) &&
+                    (categoriaId == null || (x.Categoria != null && x.Categoria.Id == categoriaId.Value)) &&
+                    (pMin == null || x.Precio >= pMin.Value) &&
+                    (pMax == null || x.Precio <= pMax.Value))
+                .Select(s => new ProductoResponse()
+                {
+                    Id = s.Id,
+                    Nombre = s.Nombre,
+                    Precio = s.Precio,
+                    Stock = s.Stock,
+                    Categoria = s.Categoria
+                }).ToList();
+
+            return listaProductos;
         }
 
-        public bool Update(ProductoRequest request)
+        public bool Update(int id, ProductoRequest request)
         {
-            throw new NotImplementedException();
+            var productoExistente = _productoRepository.GetById(id);
+
+            if (productoExistente == null)
+            {
+                return false;
+            }
+
+            if (string.IsNullOrEmpty(request.Nombre) || request.Precio <= 0)
+            {
+                return false;
+            }
+
+            return _productoRepository.Update(productoExistente, request);
         }
 
         public bool UpdateKeyMetadata(int id, UpdateKeyMetadataRequest producto)
         {
-            throw new NotImplementedException();
+            var productoExistente = _productoRepository.GetById(id);
+
+            if (productoExistente == null)
+            {
+                return false;
+            }
+
+            productoExistente.Nombre = producto.Nombre ?? productoExistente.Nombre;
+            productoExistente.Precio = producto.Precio ?? productoExistente.Precio;
+            productoExistente.Stock = producto.Stock ?? productoExistente.Stock;
+
+            return true;
         }
     }
 }

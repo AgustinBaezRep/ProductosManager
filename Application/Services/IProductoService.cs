@@ -13,7 +13,7 @@ namespace Application.Services
         bool AssociateCategory(int id, int categoriaId);
         bool DisassociateCategory(int id);
         bool Create(ProductoRequest request);
-        bool Update(ProductoRequest request);
+        bool Update(int id, ProductoRequest request);
         bool UpdateKeyMetadata(int id, UpdateKeyMetadataRequest producto);
         bool Delete(int id);
     }

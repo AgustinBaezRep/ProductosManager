@@ -25,25 +25,19 @@ namespace Api.Controllers
 
             if (!listaProductos.Any())
             {
-                return Conflict("El numero de productos es menor a 2");
+                return NotFound();
             }
 
             return Ok(listaProductos);
         }
 
         [HttpGet("buscar")]
-        public ActionResult<List<Producto>> Search([FromQuery] string? name,
-            [FromQuery] int? categoriaId,
-            [FromQuery] decimal? pMin,
+        public ActionResult<List<Producto>> Search([FromQuery] string? name, 
+            [FromQuery] int? categoriaId, 
+            [FromQuery] decimal? pMin, 
             [FromQuery] decimal? pMax)
         {
-            var listaProductos = DataTables.Productos
-                .Where(x =>
-                    (string.IsNullOrWhiteSpace(name) || x.Nombre.Contains(name, StringComparison.OrdinalIgnoreCase)) &&
-                    (categoriaId is null || (x.Categoria is not null && x.Categoria.Id == categoriaId.Value)) &&
-                    (pMin is null || x.Precio >= pMin.Value) &&
-                    (pMax is null || x.Precio <= pMax.Value))
-                .ToList();
+            var listaProductos = _productoService.Search(name, categoriaId, pMin, pMax);
 
             if (!listaProductos.Any())
             {
@@ -56,7 +50,7 @@ namespace Api.Controllers
         [HttpGet("precio-minimo/{valor}")]
         public ActionResult<List<Producto>> GetByValue([FromRoute] decimal valor)
         {
-            var listaProductos = DataTables.Productos.Where(x => x.Precio >= valor).ToList();
+            var listaProductos = _productoService.GetByValue(valor);
 
             if (!listaProductos.Any())
             {
@@ -69,7 +63,7 @@ namespace Api.Controllers
         [HttpGet("{id}")]
         public ActionResult<Producto> GetById([FromRoute] int id)
         {
-            var producto = DataTables.Productos.FirstOrDefault(x => x.Id == id);
+            var producto = _productoService.GetById(id);
 
             if (producto == null)
             {
@@ -82,27 +76,18 @@ namespace Api.Controllers
         [HttpGet("total")]
         public ActionResult<int> GetTotalOfProducts()
         {
-            return Ok(DataTables.Productos.Count());
+            return Ok(_productoService.GetTotalProductos());
         }
 
         [HttpPut("{id}/asociar/{categoriaId}")]
         public IActionResult AssociateCategory([FromRoute] int id, [FromRoute] int categoriaId)
         {
-            var producto = DataTables.Productos.FirstOrDefault(x => x.Id == id);
+            var associated = _productoService.AssociateCategory(id, categoriaId);
 
-            var categoria = DataTables.Categorias.FirstOrDefault(x => x.Id == categoriaId);
-
-            if (producto == null || categoria == null)
+            if (!associated)
             {
-                return NotFound("Producto o categoria no encontrado");
+                return Conflict($"Ocurrio un error al asociar el producto de id {id}, a la categoria de id {categoriaId}");
             }
-
-            if (producto.Categoria != null)
-            {
-                return Conflict("El producto ya está asociado a esta categoría");
-            }
-
-            producto.Categoria = categoria;
 
             return NoContent();
         }
@@ -110,14 +95,12 @@ namespace Api.Controllers
         [HttpDelete("{id}/desasociar")]
         public IActionResult DisassociateCategory([FromRoute] int id)
         {
-            var producto = DataTables.Productos.FirstOrDefault(x => x.Id == id);
+            var disassociated = _productoService.DisassociateCategory(id);
 
-            if (producto == null)
+            if (!disassociated)
             {
-                return NotFound("Producto no encontrado");
+                return Conflict($"Ocurrio un error al desasociar la categoria, al producto de id {id}");
             }
-
-            producto.Categoria = null;
 
             return NoContent();
         }
@@ -132,26 +115,18 @@ namespace Api.Controllers
                 return Conflict("Error al crear el producto");
             }
 
-            return Created(nameof(GetById), producto.Id);
+            return CreatedAtAction(nameof(GetById), new { id = producto.Id }, producto.Id);
         }
 
         [HttpPut("{id}")]
         public IActionResult Update([FromRoute] int id, [FromBody] ProductoRequest producto)
         {
-            var productoExistente = DataTables.Productos.FirstOrDefault(x => x.Id == id);
+            var isUpdated = _productoService.Update(id, producto);
 
-            if (productoExistente == null)
+            if (!isUpdated)
             {
-                return NotFound("Producto no encontrado");
+                return Conflict("Error al actualizar el producto");
             }
-
-            if (string.IsNullOrEmpty(producto.Nombre) || producto.Precio <= 0)
-            {
-                return BadRequest("nombre vacio y/o precio igual a 0.");
-            }
-
-            productoExistente.Nombre = producto.Nombre;
-            productoExistente.Precio = producto.Precio;
 
             return NoContent();
         }
@@ -159,16 +134,12 @@ namespace Api.Controllers
         [HttpPatch("{id}")]
         public IActionResult UpdateKeyMetadata([FromRoute] int id, [FromBody] UpdateKeyMetadataRequest producto)
         {
-            var productoExistente = DataTables.Productos.FirstOrDefault(x => x.Id == id);
+            var isUpdated = _productoService.UpdateKeyMetadata(id, producto);
 
-            if (productoExistente == null)
+            if (!isUpdated)
             {
-                return NotFound("Producto no encontrado");
+                return Conflict("Error al actualizar el producto");
             }
-
-            productoExistente.Nombre = producto.Nombre ?? productoExistente.Nombre;
-            productoExistente.Precio = producto.Precio ?? productoExistente.Precio;
-            productoExistente.Stock = producto.Stock ?? productoExistente.Stock;
 
             return NoContent();
         }
@@ -176,14 +147,12 @@ namespace Api.Controllers
         [HttpDelete("{id}")]
         public IActionResult Delete([FromRoute] int id)
         {
-            var productoExistente = DataTables.Productos.FirstOrDefault(x => x.Id == id);
+            var isDeleted = _productoService.Delete(id);
 
-            if (productoExistente == null)
+            if (!isDeleted)
             {
-                return NotFound("Producto no encontrado");
+                return Conflict("Error al eliminar el producto");
             }
-
-            DataTables.Productos.Remove(productoExistente);
 
             return NoContent();
         }

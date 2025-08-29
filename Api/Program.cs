@@ -1,4 +1,6 @@
+using Application.Abstraction;
 using Application.Services;
+using Infrastructure.Persistence.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +9,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IProductoService, ProductoService>();
+
+builder.Services.AddScoped<IProductoRepository, ProductoRespository>();
+builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
 
 var app = builder.Build();
 

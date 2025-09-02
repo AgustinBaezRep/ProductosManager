@@ -1,5 +1,6 @@
-﻿using Application.Data;
-using Domain.Entities;
+﻿using Application.Services;
+using Contracts.Requests;
+using Contracts.Responses;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
@@ -8,18 +9,30 @@ namespace Api.Controllers
     [ApiController]
     public class CategoriasController : ControllerBase
     {
-        [HttpGet]
-        public ActionResult<List<Categoria>> GetAll()
+        private readonly ICategoriaService _categoriaService;
+
+        public CategoriasController(ICategoriaService categoriaService)
         {
-            var listaCategorias = DataTables.Categorias.ToList();
+            _categoriaService = categoriaService;
+        }
+
+        [HttpGet]
+        public ActionResult<List<CategoriaResponse>> GetAll()
+        {
+            var listaCategorias = _categoriaService.GetAll();
+
+            if (!listaCategorias.Any())
+            {
+                return NotFound("No hay categorías disponibles");
+            }
 
             return Ok(listaCategorias);
         }
 
         [HttpGet("{id}")]
-        public ActionResult<Categoria> GetById([FromRoute] int id)
+        public ActionResult<CategoriaResponse?> GetById([FromRoute] int id)
         {
-            var categoria = DataTables.Categorias.FirstOrDefault(x => x.Id == id);
+            var categoria = _categoriaService.GetById(id);
 
             if (categoria == null)
             {
@@ -30,85 +43,53 @@ namespace Api.Controllers
         }
 
         [HttpGet("{id}/productos")]
-        public ActionResult<List<Producto>> GetProductosByCategoriaId([FromRoute] int id)
+        public ActionResult<List<ProductoResponse>> GetProductosByCategoriaId([FromRoute] int id)
         {
-            var categoria = DataTables.Categorias.FirstOrDefault(x => x.Id == id);
-
-            if (categoria == null)
-            {
-                return NotFound("Categoria no encontrada");
-            }
-
-            var productos = DataTables.Productos.Where(p => p.Categoria?.Id == id).ToList();
+            var productos = _categoriaService.GetProductosByCategoriaId(id);
 
             if (!productos.Any())
             {
-                return NotFound("No hay productos asociados a esta categoría");
+                return NotFound("No hay productos para esta categoría");
             }
 
             return Ok(productos);
         }
 
         [HttpPost]
-        public ActionResult<Categoria> Create([FromBody] Categoria categoria)
+        public ActionResult Create([FromBody] CreateCategoriaRequest categoria)
         {
-            if (categoria == null || string.IsNullOrWhiteSpace(categoria.Nombre))
+            var isCreated = _categoriaService.Create(categoria);
+
+            if (!isCreated)
             {
-                return BadRequest("Categoria no puede ser nula o tener un nombre vacío");
+                return Conflict("No se pudo crear la categoría");
             }
 
-            var nuevaCategoria = new Categoria
-            {
-                Id = DataTables.Categorias.Any() ? DataTables.Categorias.Max(x => x.Id) + 1 : 1,
-                Nombre = categoria.Nombre
-            };
-
-            DataTables.Categorias.Add(nuevaCategoria);
-
-            return CreatedAtAction(nameof(GetById), new { id = nuevaCategoria.Id }, nuevaCategoria);
+            return CreatedAtAction(nameof(GetById), new { id = categoria.Id }, categoria.Id);
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update([FromRoute] int id, [FromBody] Categoria categoria)
+        public ActionResult Update([FromRoute] int id, [FromBody] UpdateCategoriaRequest categoria)
         {
-            var categoriaExistente = DataTables.Categorias.FirstOrDefault(x => x.Id == id);
+            var isUpdated = _categoriaService.Update(id, categoria);
 
-            if (categoriaExistente == null)
+            if (!isUpdated)
             {
-                return NotFound("Categoria no encontrada");
+                return Conflict("No se pudo actualizar la categoría");
             }
-
-            if (categoria == null || string.IsNullOrWhiteSpace(categoria.Nombre))
-            {
-                return BadRequest("Categoria no puede ser nula o tener un nombre vacío");
-            }
-
-            if (DataTables.Productos.Any(p => p.Categoria?.Id == id))
-            {
-                return Conflict("No se puede actualizar la categoría porque hay productos asociados a ella.");
-            }
-
-            categoriaExistente.Nombre = categoria.Nombre;
 
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete([FromRoute] int id)
+        public ActionResult Delete([FromRoute] int id)
         {
-            var categoriaExistente = DataTables.Categorias.FirstOrDefault(x => x.Id == id);
+            var isDeleted = _categoriaService.Delete(id);
 
-            if (categoriaExistente == null)
+            if (!isDeleted)
             {
-                return NotFound("Categoria no encontrada");
+                return Conflict("No se pudo eliminar la categoría");
             }
-
-            if (DataTables.Productos.Any(p => p.Categoria?.Id == id))
-            {
-                return Conflict("No se puede eliminar la categoría porque hay productos asociados a ella.");
-            }
-
-            DataTables.Categorias.Remove(categoriaExistente);
 
             return NoContent();
         }

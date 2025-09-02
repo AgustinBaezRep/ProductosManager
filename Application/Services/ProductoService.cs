@@ -43,9 +43,15 @@ namespace Application.Services
 
             producto.Id = productos.Any() ? productos.Max(x => x.Id) + 1 : 1;
 
-            int stock = producto.Stock == null ? 10 : producto.Stock.Value;
+            producto.Stock = producto.Stock == null ? 10 : producto.Stock.Value;
 
-            var newProducto = new Producto(producto.Id, producto.Nombre, producto.Precio, stock);
+            var newProducto = new Producto()
+            {
+                Id = producto.Id,
+                Nombre = producto.Nombre,
+                Precio = producto.Precio,
+                Stock = producto.Stock.Value
+            };
 
             return _productoRepository.Create(newProducto);
         }

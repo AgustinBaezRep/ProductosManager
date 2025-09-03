@@ -6,9 +6,9 @@ namespace Infrastructure.Persistence.Data
     {
         public static List<Producto> Productos { get; set; } =
         [
-            new Producto(1, "Libro A", 1200.00m, 10),
-            new Producto(2, "Libro B", 800.00m, 20),
-            new Producto(3, "Libro C", 300.00m, 15)
+            new Producto() { Id = 1, Nombre = "Libro A", Precio = 1200.00m, Stock = 10 },
+            new Producto() { Id = 2, Nombre = "Libro B", Precio = 800.00m, Stock = 20 },
+            new Producto() { Id = 3, Nombre = "Libro C", Precio = 300.00m, Stock = 15 }
         ];
 
         public static List<Categoria> Categorias { get; set; } =

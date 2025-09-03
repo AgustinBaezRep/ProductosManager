@@ -1,4 +1,5 @@
 ﻿using Application.Abstraction;
+using Contracts.Requests;
 using Domain.Entities;
 using Infrastructure.Persistence.Data;
 using System.Linq.Expressions;
@@ -22,11 +23,14 @@ namespace Infrastructure.Persistence.Repositories
         public bool Create(Categoria categoria)
         {
             DataTables.Categorias.Add(categoria);
+
             return true;
         }
 
-        public bool Update(Categoria categoria)
+        public bool Update(Categoria categoria, UpdateCategoriaRequest request)
         {
+            categoria.Nombre = request.Nombre;
+
             return true;
         }
 
@@ -38,6 +42,11 @@ namespace Infrastructure.Persistence.Repositories
         public List<Categoria> GetByCriteria(Expression<Func<Categoria, bool>> expression)
         {
             return DataTables.Categorias.AsQueryable().Where(expression).ToList();
+        }
+
+        public bool CheckIfIsAssociatedToAnyProduct(int categoriaId)
+        {
+            return DataTables.Productos.Any(p => p.Categoria?.Id == categoriaId);
         }
     }
 }

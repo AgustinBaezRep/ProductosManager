@@ -36,11 +36,6 @@ namespace Application.Services
         {
             var productos = _productoRepository.GetAll();
 
-            if (string.IsNullOrEmpty(producto.Nombre) || producto.Precio <= 0 || producto.Stock < 0)
-            {
-                return false;
-            }
-
             producto.Id = productos.Any() ? productos.Max(x => x.Id) + 1 : 1;
 
             producto.Stock = producto.Stock == null ? 10 : producto.Stock.Value;

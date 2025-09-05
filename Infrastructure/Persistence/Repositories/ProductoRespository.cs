@@ -8,7 +8,12 @@ namespace Infrastructure.Persistence.Repositories
 {
     public class ProductoRespository : IProductoRepository
     {
-        public ProductoRespository() { }
+        private readonly ProductosManagerDbContext _context;
+
+        public ProductoRespository(ProductosManagerDbContext context)
+        {
+            _context = context;
+        }
 
         public List<Producto> GetAll()
         {

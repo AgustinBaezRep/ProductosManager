@@ -104,7 +104,9 @@ namespace Application.Services
                 return false;
             }
 
-            return _categoriaRepository.Update(categoriaExistente, request);
+            categoriaExistente.Nombre = request.Nombre;
+
+            return _categoriaRepository.Update(categoriaExistente);
         }
 
         public bool Delete(int id)

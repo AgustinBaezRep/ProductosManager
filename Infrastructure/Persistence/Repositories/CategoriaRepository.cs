@@ -1,52 +1,60 @@
 ﻿using Application.Abstraction;
-using Contracts.Requests;
 using Domain.Entities;
-using Infrastructure.Persistence.Data;
 using System.Linq.Expressions;
 
 namespace Infrastructure.Persistence.Repositories
 {
     public class CategoriaRepository : ICategoriaRepository
     {
-        public CategoriaRepository() { }
+        private readonly ProductosManagerDbContext _context;
+
+        public CategoriaRepository(ProductosManagerDbContext context)
+        {
+            _context = context;
+        }
 
         public List<Categoria> GetAll()
         {
-            return DataTables.Categorias.ToList();
+            return _context.Categorias.ToList();
         }
 
         public Categoria? GetById(int id)
         {
-            return DataTables.Categorias.FirstOrDefault(x => x.Id == id);
+            return _context.Categorias.FirstOrDefault(x => x.Id == id);
         }
 
         public bool Create(Categoria categoria)
         {
-            DataTables.Categorias.Add(categoria);
+            _context.Categorias.Add(categoria);
+            _context.SaveChanges();
 
             return true;
         }
 
-        public bool Update(Categoria categoria, UpdateCategoriaRequest request)
+        public bool Update(Categoria categoria)
         {
-            categoria.Nombre = request.Nombre;
+            _context.Categorias.Update(categoria);
+            _context.SaveChanges();
 
             return true;
         }
 
         public bool Delete(Categoria categoria)
         {
-            return DataTables.Categorias.Remove(categoria);
+            _context.Categorias.Remove(categoria);
+            _context.SaveChanges();
+
+            return true;
         }
 
         public List<Categoria> GetByCriteria(Expression<Func<Categoria, bool>> expression)
         {
-            return DataTables.Categorias.AsQueryable().Where(expression).ToList();
+            return _context.Categorias.Where(expression).ToList();
         }
 
         public bool CheckIfIsAssociatedToAnyProduct(int categoriaId)
         {
-            return DataTables.Productos.Any(p => p.Categoria?.Id == categoriaId);
+            return _context.Libros.Any(p => p.Categoria.Id == categoriaId);
         }
     }
 }

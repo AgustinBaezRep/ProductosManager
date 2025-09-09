@@ -6,12 +6,12 @@ namespace Application.Abstraction
 {
     public interface IProductoRepository
     {
-        List<Producto> GetAll();
-        Producto? GetById(int id);
-        bool Create(Producto producto);
-        bool Update(Producto producto, UpdateProductoRequest request);
-        bool UpdateKeyMetadata(Producto producto, UpdateKeyMetadataProductoRequest request);
-        bool Delete(Producto producto);
-        List<Producto> GetByCriteria(Expression<Func<Producto, bool>> expression);
+        List<Libro> GetAll();
+        Libro? GetById(int id);
+        bool Create(Libro producto);
+        bool Update(Libro producto);
+        bool UpdateKeyMetadata(Libro producto);
+        bool Delete(Libro producto);
+        List<Libro> GetByCriteria(Expression<Func<Libro, bool>> expression);
     }
 }

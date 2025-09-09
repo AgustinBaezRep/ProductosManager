@@ -40,7 +40,7 @@ namespace Application.Services
 
             producto.Stock = producto.Stock == null ? 10 : producto.Stock.Value;
 
-            var newProducto = new Producto()
+            var newProducto = new Libro()
             {
                 Id = producto.Id,
                 Nombre = producto.Nombre,
@@ -74,7 +74,7 @@ namespace Application.Services
 
             producto.Categoria = null;
 
-            return true;
+            return _productoRepository.Update(producto);
         }
 
         public bool AssociateCategory(int id, int categoriaId)
@@ -95,12 +95,12 @@ namespace Application.Services
 
             producto.Categoria = categoria;
 
-            return true;
+            return _productoRepository.Update(producto);
         }
 
         public ProductoResponse? GetById(int id)
         {
-            return _productoRepository.GetById(id) is Producto producto
+            return _productoRepository.GetById(id) is Libro producto
                 ? new ProductoResponse()
                 {
                     Id = producto.Id,
@@ -167,10 +167,14 @@ namespace Application.Services
                 return false;
             }
 
-            return _productoRepository.Update(productoExistente, request);
+            productoExistente.Nombre = request.Nombre;
+            productoExistente.Precio = request.Precio;
+            productoExistente.Stock = request.Stock;
+
+            return _productoRepository.Update(productoExistente);
         }
 
-        public bool UpdateKeyMetadata(int id, UpdateKeyMetadataProductoRequest producto)
+        public bool UpdateKeyMetadata(int id, UpdateKeyMetadataProductoRequest request)
         {
             var productoExistente = _productoRepository.GetById(id);
 
@@ -179,7 +183,11 @@ namespace Application.Services
                 return false;
             }
 
-            return _productoRepository.UpdateKeyMetadata(productoExistente, producto);
+            productoExistente.Nombre = request.Nombre ?? productoExistente.Nombre;
+            productoExistente.Precio = request.Precio ?? productoExistente.Precio;
+            productoExistente.Stock = request.Stock ?? productoExistente.Stock;
+
+            return _productoRepository.UpdateKeyMetadata(productoExistente);
         }
     }
 }

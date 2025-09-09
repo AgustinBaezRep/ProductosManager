@@ -1,7 +1,6 @@
 ﻿using Application.Abstraction;
-using Contracts.Requests;
 using Domain.Entities;
-using Infrastructure.Persistence.Data;
+using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace Infrastructure.Persistence.Repositories
@@ -15,49 +14,51 @@ namespace Infrastructure.Persistence.Repositories
             _context = context;
         }
 
-        public List<Producto> GetAll()
+        public List<Libro> GetAll()
         {
-            return DataTables.Productos.ToList();
+            return _context.Libros.Include(c => c.Categoria).ToList();
         }
 
-        public Producto? GetById(int id)
+        public Libro? GetById(int id)
         {
-            return DataTables.Productos.FirstOrDefault(x => x.Id == id);
+            return _context.Libros.Include(c => c.Categoria).FirstOrDefault(x => x.Id == id);
         }
 
-        public bool Create(Producto producto)
+        public bool Create(Libro producto)
         {
-            DataTables.Productos.Add(producto);
+            _context.Libros.Add(producto);
+            _context.SaveChanges();
 
             return true;
         }
 
-        public bool Update(Producto producto, UpdateProductoRequest request)
+        public bool Update(Libro producto)
         {
-            producto.Nombre = request.Nombre;
-            producto.Precio = request.Precio;
-            producto.Stock = request.Stock;
+            _context.Libros.Update(producto);
+            _context.SaveChanges();
 
             return true;
         }
 
-        public bool UpdateKeyMetadata(Producto producto, UpdateKeyMetadataProductoRequest request)
+        public bool UpdateKeyMetadata(Libro producto)
         {
-            producto.Nombre = request.Nombre ?? producto.Nombre;
-            producto.Precio = request.Precio ?? producto.Precio;
-            producto.Stock = request.Stock ?? producto.Stock;
+            _context.Libros.Update(producto);
+            _context.SaveChanges();
 
             return true;
         }
 
-        public bool Delete(Producto producto)
+        public bool Delete(Libro producto)
         {
-            return DataTables.Productos.Remove(producto);
+            _context.Libros.Remove(producto);
+            _context.SaveChanges();
+
+            return true;
         }
 
-        public List<Producto> GetByCriteria(Expression<Func<Producto, bool>> expression)
+        public List<Libro> GetByCriteria(Expression<Func<Libro, bool>> expression)
         {
-            return DataTables.Productos.AsQueryable().Where(expression).ToList();
+            return _context.Libros.Include(c => c.Categoria).Where(expression).ToList();
         }
     }
 }

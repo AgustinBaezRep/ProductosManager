@@ -1,10 +1,11 @@
 ﻿using Application.Abstraction;
+using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace Infrastructure.Persistence.Repositories;
 
-public abstract class BaseRepository<T> : IBaseRepository<T> where T : class
+public abstract class BaseRepository<T> : IBaseRepository<T> where T : BaseEntity
 {
     private readonly ProductosManagerDbContext _context;
     private readonly DbSet<T> _dbSet;

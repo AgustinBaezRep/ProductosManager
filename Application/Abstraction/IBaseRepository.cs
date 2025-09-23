@@ -1,8 +1,9 @@
-﻿using System.Linq.Expressions;
+﻿using Domain.Entities;
+using System.Linq.Expressions;
 
 namespace Application.Abstraction;
 
-public interface IBaseRepository<T> where T : class
+public interface IBaseRepository<T> where T : BaseEntity
 {
     List<T> GetAll();
     T? GetById(int id);

@@ -1,8 +1,7 @@
 ﻿namespace Domain.Entities
 {
-    public class Libro
+    public class Libro : BaseEntity
     {
-        public int Id { get; set; }
         public string Nombre { get; set; }
         public decimal Precio { get; set; }
         public int Stock { get; set; }

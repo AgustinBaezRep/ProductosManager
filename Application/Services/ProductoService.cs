@@ -187,7 +187,7 @@ namespace Application.Services
             productoExistente.Precio = request.Precio ?? productoExistente.Precio;
             productoExistente.Stock = request.Stock ?? productoExistente.Stock;
 
-            return _productoRepository.UpdateKeyMetadata(productoExistente);
+            return _productoRepository.Update(productoExistente);
         }
     }
 }

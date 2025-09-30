@@ -1,6 +1,8 @@
 ﻿using Application.Services;
 using Contracts.Requests;
 using Contracts.Responses;
+using Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
@@ -16,6 +18,7 @@ namespace Api.Controllers
             _categoriaService = categoriaService;
         }
 
+        [Authorize(Policy = nameof(TipoRol.Administrador))]
         [HttpGet]
         public ActionResult<List<CategoriaResponse>> GetAll()
         {

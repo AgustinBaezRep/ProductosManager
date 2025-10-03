@@ -1,6 +1,8 @@
-﻿namespace Application.Abstraction.ExternalServices;
+﻿using Contracts.Requests;
+
+namespace Application.Abstraction.ExternalServices;
 
 public interface IAuthenticationService
 {
-    string Login(string email, string password);
+    string Login(LoginRequest request);
 }

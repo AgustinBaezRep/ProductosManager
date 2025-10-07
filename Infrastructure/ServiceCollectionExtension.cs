@@ -2,6 +2,7 @@
 using Application.Abstraction.ExternalServices;
 using Domain.Entities;
 using Infrastructure.ExternalServices;
+using Infrastructure.Options;
 using Infrastructure.Persistence;
 using Infrastructure.Persistence.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -22,7 +23,9 @@ public static class ServiceCollectionExtension
             .AddAuthenticationConfiguration(builder)
             .AddAuthorizationConfiguration()
             .AddRepositories()
-            .AddExternalServices();
+            .AddExternalServices()
+            // Agregamos el método para configurar las opciones
+            .AddOptions(builder);
     }
 
     public static IServiceCollection AddDatabaseConfiguration(this IServiceCollection services, WebApplicationBuilder builder)
@@ -74,6 +77,17 @@ public static class ServiceCollectionExtension
     public static IServiceCollection AddExternalServices(this IServiceCollection services)
     {
         services.AddScoped<IAuthenticationService, AuthenticationService>();
+
+        // Registramos el servicio HTTP para IGoogleBookApiService
+        services.AddHttpClient<IGoogleBookApiService, GoogleBookApiService>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddOptions(this IServiceCollection services, WebApplicationBuilder builder)
+    {
+        // Registramos las opciones de configuración para GoogleBookApiOptions con el Options Pattern
+        services.Configure<GoogleBookApiOptions>(builder.Configuration.GetSection(GoogleBookApiOptions.SectionName));
 
         return services;
     }

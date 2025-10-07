@@ -1,4 +1,5 @@
 ﻿using Application.Abstraction;
+using Application.Abstraction.ExternalServices;
 using Contracts.Requests;
 using Contracts.Responses;
 using Domain.Entities;
@@ -9,11 +10,15 @@ namespace Application.Services
     {
         private readonly IProductoRepository _productoRepository;
         private readonly ICategoriaRepository _categoriaRepository;
+        private readonly IGoogleBookApiService _googleBookApiService;
 
-        public ProductoService(IProductoRepository productoRepository, ICategoriaRepository categoriaRepository)
+        public ProductoService(IProductoRepository productoRepository,
+            ICategoriaRepository categoriaRepository,
+            IGoogleBookApiService googleBookApiService)
         {
             _productoRepository = productoRepository;
             _categoriaRepository = categoriaRepository;
+            _googleBookApiService = googleBookApiService;
         }
 
         public List<ProductoResponse> GetAll()
@@ -28,6 +33,14 @@ namespace Application.Services
                     Stock = p.Stock,
                     Categoria = p.Categoria
                 }).ToList();
+
+            var librosExternos = _googleBookApiService.SearchBooks("programacion c sharp");
+
+            // Agregamos los libros externos a la lista de productos que vienen de la base de datos (solo el titulo ya que es el unico campo que comparten)
+            listaProductos.AddRange(librosExternos.Select(libro => new ProductoResponse
+            {
+                Nombre = libro.Title,
+            }));
 
             return listaProductos;
         }

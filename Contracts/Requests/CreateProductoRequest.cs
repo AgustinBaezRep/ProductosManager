@@ -4,7 +4,7 @@ namespace Contracts.Requests
 {
     public class CreateProductoRequest
     {
-        public int Id { get; set; }
+        //public int Id { get; set; }
 
         [Required(ErrorMessage = "El nombre es requerido")]
         public string Nombre { get; set; } = string.Empty;

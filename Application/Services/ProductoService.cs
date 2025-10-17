@@ -49,13 +49,13 @@ namespace Application.Services
         {
             var productos = _productoRepository.GetAll();
 
-            producto.Id = productos.Any() ? productos.Max(x => x.Id) + 1 : 1;
+            //producto.Id = productos.Any() ? productos.Max(x => x.Id) + 1 : 1;
 
             producto.Stock = producto.Stock == null ? 10 : producto.Stock.Value;
 
             var newProducto = new Libro()
             {
-                Id = producto.Id,
+                //Id = producto.Id,
                 Nombre = producto.Nombre,
                 Precio = producto.Precio,
                 Stock = producto.Stock.Value

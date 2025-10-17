@@ -24,14 +24,16 @@ public static class ServiceCollectionExtension
             .AddAuthorizationConfiguration()
             .AddRepositories()
             .AddExternalServices()
-            // Agregamos el método para configurar las opciones
             .AddOptions(builder);
     }
 
     public static IServiceCollection AddDatabaseConfiguration(this IServiceCollection services, WebApplicationBuilder builder)
     {
+        //return services.AddDbContext<ProductosManagerDbContext>(
+        //    options => options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
         return services.AddDbContext<ProductosManagerDbContext>(
-            options => options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+            options => options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServerConnection")));
     }
 
     public static IServiceCollection AddAuthenticationConfiguration(this IServiceCollection services, WebApplicationBuilder builder)

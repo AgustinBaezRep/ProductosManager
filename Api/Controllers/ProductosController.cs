@@ -113,7 +113,8 @@ namespace Api.Controllers
                 return Conflict("Error al crear el producto");
             }
 
-            return CreatedAtAction(nameof(GetById), new { id = producto.Id }, producto.Id);
+            return Created();
+            //return CreatedAtAction(nameof(GetById), new { id = producto.Id }, producto.Id);
         }
 
         [HttpPut("{id}")]
